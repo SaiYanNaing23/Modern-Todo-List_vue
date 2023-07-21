@@ -1,61 +1,48 @@
 <template>
   <div class="container">
-    <notifications group="foo" />
-    <div class="row justify-content-center">
-      <div class="col-11">
-        <img src="./assets/logo.png" alt="Vue-Logo" class="d-block mx-auto">
-        <form @submit.prevent="addItems">
-          <label>New Task</label>
-          <input type="text" class="form-control mt-1" v-model="task">
-          <button class="btn btn-dark mt-3" type="submit">Add New Task</button>
-        </form>
-      </div>
-    </div>
-    <div class="row justify-content-center mt-3">
-      <div class="col-11 mt-3" v-for="(todo,index) in todos" :key="index" >
-        <div class="card">
-          <div class="row p-3 align-items-center">
-            <div class="col-7">
-            <span :class="{done : todo.completed}">{{todo.task}}</span> 
-            </div>
-            <div class="col text-end">
-              <button class="btn btn-success mr-3 btn-c" @click="completeTask(index)"><i class="material-icons mt-1">check</i></button>
-              <button class="btn btn-danger" @click="removeTask(index)"><i class="material-icons mt-1">delete</i></button>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
+    <notifications group="foo" class="mt-2"/>
+    <AddTaskVue @addTask="addTask"/>
+    <transition-group class="row justify-content-center mt-3"
+    enter-active-class="animate__animated animate__backInLeft"
+    leave-active-class="animate__animated animate__backOutRight">  
+     <TodoItemsVue v-for="(todo,index) in todos" :key="index" :todo="todo" :index="index" @completeTask="completeTask" @removeTask = "removeTask" />
+    </transition-group>
   </div>
 </template>
 
 <script>
+import AddTaskVue from './components/AddTask.vue';
+import TodoItemsVue from './components/TodoItems.vue';
+
 export default {
   name: 'App',
+  components :{
+    AddTaskVue,TodoItemsVue
+  },
   data : ()=>({
-    task : "",
     todos : [],
   }),
   methods :{
-    addItems(){
-      this.todos.push({task:this.task,completed:false});
-      this.task = "";
+    addTask(taskItems){
+      this.todos.push(taskItems);
     },
     removeTask(index){
-      this.todos.splice(index,1)
-      this.$notify({
+      if(confirm("Are You Sure To Delete This Task? ")){
+        this.todos.splice(index,1)
+         this.$notify({
         group: 'foo',
         title: 'Deleted!',
-        text: 'Hello user! Your Task has been removed!',
-        type: 'warn',
+        text: 'Hello user! Your Task has been removed 👌',
+        type: 'error',
       });
+      }
     },
     completeTask(index){
       this.todos[index].completed = true;
       this.$notify({
         group: 'foo',
         title: 'Completed!',
-        text: 'Hello user! Your Task is completed!',
+        text: 'Hello user! Your Task is completed 😉',
         type: 'success',
       });
     },
@@ -81,6 +68,7 @@ label{
 }
 .done{
   text-decoration: line-through;
+  text-decoration-thickness: 2px;
 }
 span{
   font-size: 20px;
